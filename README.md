@@ -7,4 +7,4 @@ If your server runs on localhost:8000 you run `deno run --allow-net http_test.ts
 ### Example output
 The test will run for at most 500ms but will finish immediately if the server is up to spec.
 
-![](Screenshot 2024-10-25 225330.png)
+![](example.png)
