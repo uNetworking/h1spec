@@ -8,10 +8,49 @@ Quick and easy HTTP/1.1 server spec. compliance check that finishes in less than
 
 
 ### How to run
-The server should echo back whatever body it gets, under all methods.
+Hit `make` and see what happens (runs on Linux and macOS; deno, nodejs and bun should be installed).
+
+The server being tested should echo back whatever HTTP body it gets, for all HTTP methods.
+
 If your server runs on localhost:8000 you run `deno run --allow-net http_test.ts localhost 8000`
 
 ### Example output
 The test will run for at most 500ms but will finish immediately if the server is up to spec.
 
-![](example.png)
+```
+✅ Missing Host header: Response Status Code 400, Expected ranges: [[400,499]]
+✅ Overflowing negative Content-Length header: Response Status Code 400, Expected ranges: [[400,499]]
+✅ Non-numeric Content-Length header: Response Status Code 400, Expected ranges: [[400,499]]
+✅ Header containing invalid control character: Response Status Code 400, Expected ranges: [[400,499]]
+✅ Invalid prefix of request: Response Status Code 400, Expected ranges: [[400,499],[500,599]]
+✅ Valid POST request with body: Response Status Code 200, Expected ranges: [[200,299],[404,404]]
+✅ Conflicting Transfer-Encoding and Content-Length in varying case: Response Status Code 400, Expected ranges: [[400,499],[200,299]]
+✅ Request without HTTP version: Response Status Code 400, Expected ranges: [[400,599]]
+✅ Request with Expect header: Response Status Code 100, Expected ranges: [[100,100],[200,299]]
+✅ Valid GET request: Response Status Code 200, Expected ranges: [[200,299]]
+✅ Valid GET request with edge cases: Response Status Code 200, Expected ranges: [[200,299]]
+✅ Invalid header characters: Response Status Code 400, Expected ranges: [[400,499]]
+❌ Multiple Host headers: Response Status Code 200, Expected ranges: [[400,499]]
+✅ Negative Content-Length header: Response Status Code 400, Expected ranges: [[400,499]]
+✅ Empty header value: Response Status Code 200, Expected ranges: [[200,299]]
+✅ Invalid HTTP version: Response Status Code 400, Expected ranges: [[400,499],[500,599]]
+✅ Invalid line ending: Response Status Code 400, Expected ranges: [[400,499]]
+✅ Chunked Transfer-Encoding: Response Status Code 200, Expected ranges: [[200,299]]
+✅ Fragmented HTTP version: Server waited successfully
+✅ Fragmented field name: Server waited successfully
+✅ Fragmented method: Server waited successfully
+✅ Fragmented URL 1: Server waited successfully
+✅ Fragmented URL 2: Server waited successfully
+✅ Fragmented URL 3: Server waited successfully
+✅ Fragmented request line: Server waited successfully
+✅ Fragmented request line newline 1: Server waited successfully
+✅ Fragmented request line newline 2: Server waited successfully
+✅ Fragmented field value 1: Server waited successfully
+✅ Fragmented field value 2: Server waited successfully
+✅ Fragmented field value 3: Server waited successfully
+✅ Fragmented field value 4: Server waited successfully
+✅ Fragmented request: Server waited successfully
+✅ Fragmented request termination: Server waited successfully
+
+32 out of 33 tests passed.
+```
