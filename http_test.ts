@@ -1,3 +1,6 @@
+// Test servers should echo whatever body they get, under ANY method:
+// App.any() -> res.end(body)
+
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
@@ -178,11 +181,19 @@ const testCases: TestCase[] = [
         request: "POST / HTTP/1.1\r\nHost: example.com\r\nContent-Length: 5\r\n\r\nhello",
         description: "Valid POST request with body",
         expectedStatus: [[200, 299], [404, 404]],
+        expectedBody: "hello"
     },
     {
-        request: "GET / HTTP/1.1\r\nHost: example.com\r\nTransfer-Encoding: chunked\r\nContent-Length: 5\r\n\r\n",
-        description: "Conflicting Transfer-Encoding and Content-Length",
-        expectedStatus: [[400, 499]],
+        request: "POST / HTTP/1.1\r\nHost: example.com\r\nTransfer-Encoding: chunked\r\n\r\nc\r\nHellO world1\r\n0\r\n\r\n",
+        description: "Chunked Transfer-Encoding",
+        expectedStatus: [[200, 299]],
+        expectedBody: "HellO world1"
+    },    
+    {
+        request: "POST / HTTP/1.1\r\nHost: example.com\r\ncontent-LengtH: 5\r\nTransFer-Encoding: chunked\r\n\r\nc\r\nHellO world1\r\n0\r\n\r\n",
+        description: "Conflicting Transfer-Encoding and Content-Length in varying case",
+        expectedStatus: [[400, 499], [200, 299]],
+        expectedBody: "HellO world1"
     },
 ];
 
@@ -231,16 +242,18 @@ async function runTestCase(testCase: TestCase, host: string, port: number): Prom
             const readPromise = (async () => {
                 const buffer = new Uint8Array(1024);
                 try {
+                    // This should ideally wait 100ms to make sure it got the response in full
                     const bytesRead = await conn.read(buffer);
 
                     // Clear the timeout if read completes
                     clearTimeout(timeoutId);
                     const response = decoder.decode(buffer.subarray(0, bytesRead || 0));
                     const statusCode = parseStatusCode(response);
+                    const body = parseBody(response);
 
                     const isSuccess = testCase.expectedStatus.some(
                         ([min, max]) => statusCode >= min && statusCode <= max
-                    );
+                    ) && (statusCode == 200 && testCase.expectedBody ? (body == testCase.expectedBody) : true);
 
                     console.log(
                         `${isSuccess ? "✅" : "❌"} ${testCase.description}: Response Status Code ${statusCode}, Expected ranges: ${JSON.stringify(testCase.expectedStatus)}`
@@ -267,6 +280,11 @@ function parseStatusCode(response: string): number {
     const statusLine = response.split("\r\n")[0];
     const match = statusLine.match(/HTTP\/1\.\d (\d{3})/);
     return match ? parseInt(match[1], 10) : 0;
+}
+
+function parseBody(response: string): string {
+    const bodyIndex = response.indexOf("\r\n\r\n");
+    return bodyIndex !== -1 ? response.slice(bodyIndex + 4) : undefined;
 }
 
 // Run all tests
