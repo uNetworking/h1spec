@@ -8,15 +8,11 @@ Quick and easy HTTP/1.1 server spec. compliance check that finishes in less than
 
 
 ### How to run
-Hit `make` and see what happens (runs on Linux and macOS; deno, nodejs and bun should be installed).
+To run all tests against Deno, Nodejs and Bun, just hit `make` (runs on Linux and macOS).
 
-The server being tested should echo back whatever HTTP body it gets, for all HTTP methods.
-
-If your server runs on localhost:8000 you run `deno run --allow-net http_test.ts localhost 8000`
+For a specific server, run `deno run --allow-net http_test.ts localhost 8000` if the server is listening at localhost:8000. The server must echo back whatever HTTP body it gets, for all HTTP methods.
 
 ### Example output
-The test will run for at most 500ms but will finish immediately if the server is up to spec.
-
 ```
 ✅ Missing Host header: Response Status Code 400, Expected ranges: [[400,499]]
 ✅ Overflowing negative Content-Length header: Response Status Code 400, Expected ranges: [[400,499]]
