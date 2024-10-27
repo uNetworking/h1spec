@@ -11,7 +11,7 @@ const server = http.createServer(async (req, res) => {
 
     req.on('end', () => {
         // Set the response headers
-        res.writeHead(200, { "Content-Type": "text/plain" });
+        res.writeHead(200, { "Content-Type": "text/plain", "Content-Length": body.length });
         // Send the body back as the response
         res.end(body);
     });
