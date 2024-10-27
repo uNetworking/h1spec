@@ -130,6 +130,11 @@ const testCases: TestCase[] = [
         expectedStatus: [[400, 499]],
     },
     {
+        request: "GET / HTTP/1.1\r\nHost: example.com\r\nHost: example.org\r\n\r\n",
+        description: "Multiple Host headers",
+        expectedStatus: [[400, 499]],
+    },
+    {
         request: "GET / HTTP/1.1\r\nHost: example.com\r\nContent-Length: -123456789123456789123456789\r\n\r\n",
         description: "Overflowing negative Content-Length header",
         expectedStatus: [[400, 499]],
